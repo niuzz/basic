@@ -18,7 +18,8 @@ class MyPromise {
 
     //成功态回调
     const resolve = value => {
-      // 使用macro-task机制(setTimeout),确保onFulfilled异步执行,且在 then 方法被调用的那一轮事件循环之后的新执行栈中执行。
+      // 如果没有 setTimeout 传入了同步任务，则因为同步执行，而then还没执行到，回调还没注册上
+      // 使用 setTimeout 包裹，则被加入异步队列，等主线程then方法后再去执行，就可以支持传入同步方法
       setTimeout(() => {
         if (this.state === PENDING) {
           // pending(等待态)迁移至 fulfilled(执行态),保证调用次数不超过一次。
@@ -33,7 +34,6 @@ class MyPromise {
     };
     //拒绝态回调
     const reject = reason => {
-      // 使用macro-task机制(setTimeout),确保onRejected异步执行,且在 then 方法被调用的那一轮事件循环之后的新执行栈中执行。 (满足要求 -> 调用时机)
       setTimeout(() => {
         if (this.state === PENDING) {
           // pending(等待态)迁移至 fulfilled(拒绝态),保证调用次数不超过一次。
